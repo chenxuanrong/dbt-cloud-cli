@@ -1,0 +1,25 @@
+version: 1
+
+account_id: 7108
+project_name: svp
+project_id: 34748
+
+environments:
+  - name: Staging 
+    id: 43528
+    dbt_version: 1.3.4
+    custom_branch: master
+
+    jobs:
+      - name: staging_run
+        steps:
+          - dbt seed
+          - dbt build
+        tracking: true
+        schedule: daily
+
+      - name: weekly_run
+        steps:
+          - dbt build --select tag:weekly
+        tracking: true
+        schedule: weekly

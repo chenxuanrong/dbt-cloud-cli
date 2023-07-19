@@ -1,8 +1,12 @@
 import os
-import logging
+import sys
 import time
+import logging
+
 import click
-from dbt_cloud import DbtCloudRunStatus
+from rich.console import Console
+
+from dbt_cloud import DbtCloudRunStatus, __version__
 from dbt_cloud.command import (
     DbtCloudJobGetCommand,
     DbtCloudJobCreateCommand,
@@ -27,6 +31,8 @@ from dbt_cloud.demo import data_catalog
 from dbt_cloud.serde import json_to_dict, dict_to_json
 from dbt_cloud.exc import DbtCloudException
 from dbt_cloud.field import PythonLiteralOption
+from dbt_cloud.validator import Validator
+from dbt_cloud.configuration import Configuration
 
 
 def execute_and_print(command, **kwargs):
@@ -34,6 +40,20 @@ def execute_and_print(command, **kwargs):
     click.echo(dict_to_json(response.json()))
     response.raise_for_status()
     return response
+
+
+debug_option = [
+    click.option('--debug', is_flag=True, help='Enable debug mode.')
+]
+
+
+def add_options(options):
+    def _add_options(func):
+        for option in reversed(options):
+            func = option(func)
+        return func
+
+    return _add_options
 
 
 @click.group(help="The dbt Cloud command line interface.")
@@ -407,4 +427,30 @@ def demo():
     pass
 
 
-demo.add_command(data_catalog)
+@dbt_cloud.command(short_help='Show version information.')
+def version():
+    'Show version information.'
+    print(__version__)
+
+
+@dbt_cloud.command(short_help='Check project configuration.')
+@add_options(debug_option)
+def diagnose(**kwargs):
+    'Check project configuration, datasource, connections, and assertion configuration.'
+
+    console = Console()
+    console.print('Diagnosing...')
+
+    configurator = Configuration.load()
+    console.print(configurator.account_id)
+    console.print(configurator.project_name)
+    console.print(configurator.environments)
+    console.print(configurator.jobs)
+
+    if not Validator.diagnose():
+        sys.exit(1)
+
+@dbt_cloud.command(short_help='Collect job artifacts')
+def collect(**kwargs):
+    print("Collection job artifacts")
+    
