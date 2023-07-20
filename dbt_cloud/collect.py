@@ -18,11 +18,13 @@ class Collector(object):
 
     
     def collect(self) -> List[Any]:
-        tracking_jobs = self.configurator.jobs
+        tracking_jobs = [job for job in self.configurator.jobs if job.tracking]
         results = []
-        print(f"found {len(tracking_jobs)} jobs")
+        console.print(f"Detected {len(tracking_jobs)} jobs")
+
         for job in tracking_jobs:                      
             job_id = job.job_id
+            job_name = job.name
             project_id = job.project_id
 
             res = DbtCloudRunListCommand(
@@ -33,7 +35,7 @@ class Collector(object):
             ).execute().json()
           
             jobruns = res.get("data", [])
-            print(f"found {len(jobruns)} runs for job id {job_id}")
+            console.print(f"Fetched {len(jobruns)} runs for job id {job_id}")
 
             for idx, run in enumerate(jobruns):
                 run_id = run.get("id")
@@ -52,6 +54,7 @@ class Collector(object):
                         {
                             "unique_id": node.get("unique_id"), 
                             "job_id": job_id,
+                            "job_name": job_name,
                             "run_id": run_id,
                             "dbt_version": dbt_version,
                             "execution_time": node.get("execution_time"),

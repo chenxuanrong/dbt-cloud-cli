@@ -7,6 +7,10 @@ from ruamel import yaml
 import json
 from datetime import datetime
 
+from rich.console import Console
+
+console = Console()
+
 def create_logger(name) -> logging.Logger:
     log_level = logging.WARNING
     if os.environ.get('PIPERIDER_LOG_LEVEL') == 'DEBUG':
@@ -50,4 +54,6 @@ def write_to_file(data: dict) -> None:
 
     with open(filepath, 'w') as f:
         f.write(json.dumps(data, separators=(',', ':')))
+        console.print(f"Results saved to {filepath}")
+    
     

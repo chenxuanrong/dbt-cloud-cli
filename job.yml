@@ -16,12 +16,52 @@ environments:
         steps:
           - dbt test --select source:da_address_match
           - dbt build --select tag:da_address_match --exclude tag:unit-test
-        tracking: false
+        tracking: true
         schedule: daily
+      
+      - name: airflow_paf_prd
+        id: 40879
+        steps:
+          - dbt test --select tag:paf_source
+          - dbt build --select tag:paf --exclude svp_apm_property_id_mapping
+        tracking: true
+        schedule: monthly
+      
+      - name: airflow_vg_prd
+        id: 44393
+        steps:
+          - dbt test --select tag:vg_source
+          - dbt build --select tag:vg+ --exclude svp_apm_property_id_mapping
+        tracking: true
+        schedule: weekly
+      
+      - name: airflow_psma_prd
+        id: 93798
+        steps:
+          - dbt test --select tag:psma_source
+          - dbt build --select tag:psma --exclude svp_apm_property_id_mapping --indirect-selection=buildable
+        tracking: true
+        schedule: quarterly
       
       - name: airflow_prd_export_hpg_property_activity_update_rent
         id: 139376
         steps:
           - dbt run --select hpg_api_json_property_activity_update_rent
+        tracking: true
+        schedule: daily
+
+      - name: airflow_prd_export_hpg_property_activity_delete_rent
+        id: 146029
+        steps:
+          - dbt run --select hpg_api_json_property_activity_delete_rent
+          - "dbt run-operation unload_svp_to_s3_json --args '{product: hpg, json_model: hpg_api_json_property_activity_delete_rent, s3_dir: uploads}'"
+        tracking: true
+        schedule: daily
+
+      - name: airflow_prd_hpg_profile_activity
+        id: 141767
+        steps:
+          - dbt seed --select svp_column_mapping --full-refresh
+          - dbt build --select +hpg_property_profile,tag:daily +hpg_property_activity,tag:daily --exclude svp_apm_property_id_mapping
         tracking: true
         schedule: daily

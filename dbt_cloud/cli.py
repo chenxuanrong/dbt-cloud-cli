@@ -455,7 +455,6 @@ def diagnose(**kwargs):
 @click.option("--sample", default=10, type=click.INT, help="Change API limit size")
 @add_options(debug_option)
 def collect(**kwargs):
-    print("Collection job artifacts")
     account_id = kwargs.get('account_id')
     job_id = kwargs.get("job_id")
     sample = kwargs.get("sample")
