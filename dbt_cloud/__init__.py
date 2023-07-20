@@ -4,6 +4,8 @@ import logging
 import os
 import sys
 from ruamel import yaml
+import json
+from datetime import datetime
 
 def create_logger(name) -> logging.Logger:
     log_level = logging.WARNING
@@ -43,4 +45,9 @@ def safe_load_yaml(file_path):
     return payload
 
 
+def write_to_file(data: dict) -> None:
+    filepath = os.path.join(os.getcwd(), 'metric.json')
 
+    with open(filepath, 'w') as f:
+        f.write(json.dumps(data, separators=(',', ':')))
+    

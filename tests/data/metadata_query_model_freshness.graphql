@@ -1,0 +1,13 @@
+{
+  environment(id: 43528) {
+    applied {
+      models(first: 50) {
+        edges {
+          node {
+            database
+          }
+        }
+      }
+    }
+  }
+}

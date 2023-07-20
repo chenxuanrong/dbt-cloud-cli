@@ -11,15 +11,17 @@ environments:
     custom_branch: master
 
     jobs:
-      - name: staging_run
+      - name: airflow_da_address_match_prd
+        id: 103334
         steps:
-          - dbt seed
-          - dbt build
+          - dbt test --select source:da_address_match
+          - dbt build --select tag:da_address_match --exclude tag:unit-test
+        tracking: false
+        schedule: daily
+      
+      - name: airflow_prd_export_hpg_property_activity_update_rent
+        id: 139376
+        steps:
+          - dbt run --select hpg_api_json_property_activity_update_rent
         tracking: true
         schedule: daily
-
-      - name: weekly_run
-        steps:
-          - dbt build --select tag:weekly
-        tracking: true
-        schedule: weekly

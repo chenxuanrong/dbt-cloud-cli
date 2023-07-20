@@ -1,5 +1,6 @@
 from dbt_cloud.exc import DbtCloudConfigError, DbtCloudException
 from dataclasses import dataclass
+from typing import List
 
 from dbt_cloud import safe_load_yaml
 import os
@@ -22,6 +23,7 @@ class Job(object):
     tracking: bool
     schedule: str
     environment_id: str
+    job_id: str
     project_id: str
     dbt_version: str
     generate_docs: bool
@@ -29,7 +31,7 @@ class Job(object):
 
 
 class Configuration(object):
-    def __init__(self, account_id, project_name, environments, jobs) -> None:
+    def __init__(self, account_id: str, project_name: str, environments: Environment, jobs: List[Job]) -> None:
         self.account_id = account_id
         self.project_name = project_name
         self.environments = environments
@@ -63,7 +65,8 @@ class Configuration(object):
             _jobs = _environment.get("jobs", [])
             for job in _jobs:
                 j = Job(
-                    project_id=job.get("project_id"),
+                    project_id=project_id,
+                    job_id=job.get("id"),
                     environment_id=environment_id,
                     name=job.get("name"),
                     execute_steps=job.get("steps", []),

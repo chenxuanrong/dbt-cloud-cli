@@ -13,4 +13,4 @@ dist/
 cov_html/
 
 # tox
-.tox/
+.tox/.artifacts

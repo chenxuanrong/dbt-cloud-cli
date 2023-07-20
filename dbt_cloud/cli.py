@@ -31,8 +31,8 @@ from dbt_cloud.demo import data_catalog
 from dbt_cloud.serde import json_to_dict, dict_to_json
 from dbt_cloud.exc import DbtCloudException
 from dbt_cloud.field import PythonLiteralOption
-from dbt_cloud.validator import Validator
 from dbt_cloud.configuration import Configuration
+from dbt_cloud.collect import Collector
 
 
 def execute_and_print(command, **kwargs):
@@ -46,6 +46,7 @@ debug_option = [
     click.option('--debug', is_flag=True, help='Enable debug mode.')
 ]
 
+console = Console()
 
 def add_options(options):
     def _add_options(func):
@@ -309,6 +310,7 @@ def get(**kwargs):
 @DbtCloudRunListArtifactsCommand.click_options
 def list_artifacts(**kwargs):
     command = DbtCloudRunListArtifactsCommand.from_click_options(**kwargs)
+    # console.print(command)
     execute_and_print(command)
 
 
@@ -436,9 +438,6 @@ def version():
 @dbt_cloud.command(short_help='Check project configuration.')
 @add_options(debug_option)
 def diagnose(**kwargs):
-    'Check project configuration, datasource, connections, and assertion configuration.'
-
-    console = Console()
     console.print('Diagnosing...')
 
     configurator = Configuration.load()
@@ -447,10 +446,49 @@ def diagnose(**kwargs):
     console.print(configurator.environments)
     console.print(configurator.jobs)
 
-    if not Validator.diagnose():
-        sys.exit(1)
+    # if not Validator.diagnose():
+        # sys.exit(1)
 
 @dbt_cloud.command(short_help='Collect job artifacts')
+@click.option("--account-id", default=None, type=click.STRING, help="account id")
+@click.option("--job-id", default=None, type=click.STRING, help="Job ID")
+@click.option("--sample", default=10, type=click.INT, help="Change API limit size")
+@add_options(debug_option)
 def collect(**kwargs):
     print("Collection job artifacts")
+    account_id = kwargs.get('account_id')
+    job_id = kwargs.get("job_id")
+    sample = kwargs.get("sample")
+
+    # artifacts = list_artifacts(account_id=account_id, job_id=job_id)
+    # console.print(artifacts)
+
+    configurator = Configuration.load()
+    jobs_need_tracking = [job for job in configurator.jobs if job.tracking]
+    console.print(jobs_need_tracking)
+
+    collector = Collector(configurator=configurator, limit=sample)
+    collector.collect()
     
+    # for job in jobs_need_tracking:
+    #     environment_id = job.environment_id
+    #     job_id = job.job_id
+
+    #     runs = list_job_run()
+    #     for run in runs:  
+    #         get_artifact(job_id, run_id, artifact)
+    #         # delta mechanism            
+
+    #     upload()
+
+        # account
+          # project
+           # environment
+             # job ---> collector
+               # job run
+                 # sql?
+                 # run_result.json!   
+                 # catalog.json
+                 # manifest.json
+
+

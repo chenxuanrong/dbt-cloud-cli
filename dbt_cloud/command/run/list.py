@@ -56,6 +56,7 @@ class DbtCloudRunListCommand(DbtCloudAccountCommand):
             status = None
         else:
             status = self.status.as_number()
+
         response = requests.get(
             url=self.api_url,
             headers={
