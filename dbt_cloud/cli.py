@@ -458,36 +458,8 @@ def collect(**kwargs):
     account_id = kwargs.get('account_id')
     job_id = kwargs.get("job_id")
     sample = kwargs.get("sample")
-
-    # artifacts = list_artifacts(account_id=account_id, job_id=job_id)
-    # console.print(artifacts)
+    debug = kwargs.get("debug")
 
     configurator = Configuration.load()
-    jobs_need_tracking = [job for job in configurator.jobs if job.tracking]
-    console.print(jobs_need_tracking)
-
     collector = Collector(configurator=configurator, limit=sample)
-    collector.collect()
-    
-    # for job in jobs_need_tracking:
-    #     environment_id = job.environment_id
-    #     job_id = job.job_id
-
-    #     runs = list_job_run()
-    #     for run in runs:  
-    #         get_artifact(job_id, run_id, artifact)
-    #         # delta mechanism            
-
-    #     upload()
-
-        # account
-          # project
-           # environment
-             # job ---> collector
-               # job run
-                 # sql?
-                 # run_result.json!   
-                 # catalog.json
-                 # manifest.json
-
-
+    collector.collect(debug=debug)

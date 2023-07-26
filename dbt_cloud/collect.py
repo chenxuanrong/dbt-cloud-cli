@@ -17,12 +17,13 @@ class Collector(object):
         self.limit = limit
 
     
-    def collect(self) -> List[Any]:
+    def collect(self, debug=False) -> List[Any]:
         tracking_jobs = [job for job in self.configurator.jobs if job.tracking]
         results = []
         console.print(f"Detected {len(tracking_jobs)} jobs")
+        console.print(f"Default to collection first job: {tracking_jobs[0].name}")
 
-        for job in tracking_jobs:                      
+        for job in tracking_jobs[0:1]:                      
             job_id = job.job_id
             job_name = job.name
             project_id = job.project_id
@@ -65,12 +66,13 @@ class Collector(object):
                         for node in nodes
                     ]
                     console.print(f"{idx+1}/{len(jobruns)} found {len(metrics)} nodes")
-                    # results.extend(metrics)
                     results.extend(metrics)
-        write_to_file(results)
+        if debug:
+            write_to_file(results)
 
                       
-    def upload(self) -> requests.Response:
+    def upload(self, data) -> requests.Response:
+
         response = requests.post(
             url=self.api_url, headers=self.request_headers, json=self.get_payload()
         )
