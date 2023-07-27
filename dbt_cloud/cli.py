@@ -6,7 +6,7 @@ import logging
 import click
 from rich.console import Console
 
-from dbt_cloud import DbtCloudRunStatus, __version__
+from dbt_cloud import __version__
 from dbt_cloud.command import (
     DbtCloudJobGetCommand,
     DbtCloudJobCreateCommand,
@@ -26,6 +26,7 @@ from dbt_cloud.command import (
     DbtCloudAccountListCommand,
     DbtCloudAccountGetCommand,
     DbtCloudAuditLogGetCommand,
+    DbtCloudRunStatus,
 )
 from dbt_cloud.demo import data_catalog
 from dbt_cloud.serde import json_to_dict, dict_to_json
@@ -451,15 +452,18 @@ def diagnose(**kwargs):
 
 @dbt_cloud.command(short_help='Collect job artifacts')
 @click.option("--account-id", default=None, type=click.STRING, help="account id")
-@click.option("--job-id", default=None, type=click.STRING, help="Job ID")
+@click.option("--job-id", default=None, type=click.INT, help="Job ID")
 @click.option("--sample", default=10, type=click.INT, help="Change API limit size")
+@click.option("--upload", is_flag=True, default=None, type=click.BOOL, help="Enable upload to server")
 @add_options(debug_option)
 def collect(**kwargs):
     account_id = kwargs.get('account_id')
     job_id = kwargs.get("job_id")
     sample = kwargs.get("sample")
     debug = kwargs.get("debug")
+    upload = kwargs.get("upload")
 
     configurator = Configuration.load()
-    collector = Collector(configurator=configurator, limit=sample)
-    collector.collect(debug=debug)
+    credential = Configuration.load_credentials()
+    collector = Collector(configurator=configurator, limit=sample, datasource=credential)
+    collector.collect(debug=debug, upload=upload, job_id=job_id)

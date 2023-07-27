@@ -6,6 +6,7 @@ from dbt_cloud import safe_load_yaml
 import os
 
 DBT_CLOUD_CONFIG_PATH = os.path.join(os.getcwd(), 'job.yml')
+DS_CONFIG_PATH = os.path.join(os.getcwd(), 'credential.yml')
 
 @dataclass
 class Environment(object):
@@ -84,6 +85,33 @@ class Configuration(object):
             environments=environments,
             jobs=jobs
         )
+    
+
+    @staticmethod
+    def load_credentials(config_path=DS_CONFIG_PATH):
+        config = safe_load_yaml(config_path)
+        if config is None:
+            raise DbtCloudConfigError("configuration file error")
+        
+        print(config)
+
+        for v in config.values():
+            src = {
+                'account': v.get('account'),
+                'user': v.get('user'),
+                'database': v.get('database'),
+                'role': v.get('role'),
+                'warehouse': v.get('warehouse'),
+                'schema': v.get('schema'),
+                'authenticator': v.get('authenticator'),
+                'stage': v.get('stage')
+            }
+            return src
+        
+
+if __name__ == '__main__':
+    src = Configuration.load_credentials()
+    print(src)
     
 
 

@@ -1,5 +1,3 @@
-from .command import DbtCloudRunStatus
-
 import logging
 import os
 import sys
@@ -49,11 +47,37 @@ def safe_load_yaml(file_path):
     return payload
 
 
-def write_to_file(data: dict) -> None:
-    filepath = os.path.join(os.getcwd(), 'metric.json')
+def ensure_directory_writable(directory) -> bool:
+    d = os.path.abspath(directory)
+
+    if os.path.exists(d):
+        if not os.path.isdir(directory):
+            return False
+        return os.access(d, os.W_OK)
+    else:
+        try:
+            os.makedirs(directory)
+            return True
+        except BaseException:
+            return False
+
+def write_to_file(data: dict, name:str, report_dir:str = None) -> str:
+
+    if name not in ['metric.json', 'run_results.json']:
+        print('Report name not supported. Expected one of [metric.json, run_results.json]')
+        return
+
+    if not report_dir:
+        dir = os.getcwd()
+    else:
+        dir = report_dir
+
+    if ensure_directory_writable(dir):
+        filepath = os.path.join(dir, name)
+    else:
+        filepath = os.path.join('/tmp', name)
 
     with open(filepath, 'w') as f:
         f.write(json.dumps(data, separators=(',', ':')))
         console.print(f"Results saved to {filepath}")
-    
-    
+        return filepath
