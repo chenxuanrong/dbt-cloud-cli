@@ -29,6 +29,7 @@ setup(
         "snowflake-sqlalchemy",
         "ruamel.yaml",
         "sqlalchemy>=1.3.18",
+        "rich>=12.0.0",
     ],
     extras_require={
         "test": ["pytest", "pytest-cov", "pytest-datadir", "requests-mock"],
