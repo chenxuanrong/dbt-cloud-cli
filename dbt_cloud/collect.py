@@ -1,15 +1,14 @@
-import json
-import os
 from typing import List, Any
-from dbt_cloud.configuration import Configuration, Job, Environment
+
+from rich.console import Console
+import requests
+
+from dbt_cloud import write_to_file
 from dbt_cloud.command.job.list import DbtCloudJobListCommand
 from dbt_cloud.command.run.list import DbtCloudRunListCommand
 from dbt_cloud.command.run.get_artifact import DbtCloudRunGetArtifactCommand
-from dbt_cloud.serde import json_to_dict
-from rich.console import Console
-import requests
-from dbt_cloud import write_to_file
 from dbt_cloud.datasource import SnowflakeConnector
+from dbt_cloud.configuration import Configuration
 
 console = Console()
 URL = "http://127.0.0.1:5000/metric/operational"
@@ -30,15 +29,13 @@ class Collector(object):
             console.print(tracking_jobs)
         if job_id:
             selected_jobs = [job for job in tracking_jobs if job.job_id == job_id]
-            console.print(job_id)
-            console.print(f"Finding job {len(selected_jobs)}")
+            console.print(f"Collecting {len(selected_jobs)} jobs")
         else:
-            selected_jobs = tracking_jobs[0]
-            console.print(f"Collecting {len(tracking_jobs)}")
-        # console.print(f"Default to collection first job: {tracking_jobs[0].name}")
+            selected_jobs = tracking_jobs
+            console.print(f"Collecting {len(selected_jobs)} jobs")
 
         if len(selected_jobs) == 0:
-            console.print("No job selected")
+            console.print("No job found")
         else:
             for job in selected_jobs:
                 job_id = job.job_id
@@ -94,13 +91,13 @@ class Collector(object):
                     else:
                         console.print(f"{idx+1}/{len(jobruns)} artifacts not found. Run Id {run_id}")
                         
-            if debug:
-                filepath = write_to_file(data=payloads, name='metric.json')
-                rawfilepath = write_to_file(data=raw_artifacts, name='run_results.json')
-                self.archive([rawfilepath])
             if upload:
                 console.print("Uploading report...")
                 self.upload(payloads)
+
+            filepath = write_to_file(data=payloads, name='metric.json')
+            rawfilepath = write_to_file(data=raw_artifacts, name='run_results.json')
+            self.archive([rawfilepath])
                       
     def upload(self, json:List) -> requests.Response:
 

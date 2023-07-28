@@ -1,9 +1,9 @@
-from dbt_cloud.exc import DbtCloudConfigError, DbtCloudException
-from dataclasses import dataclass
+import os
 from typing import List
+from dataclasses import dataclass
 
 from dbt_cloud import safe_load_yaml
-import os
+from dbt_cloud.exc import DbtCloudConfigError, DbtCloudException
 
 DBT_CLOUD_CONFIG_PATH = os.path.join(os.getcwd(), 'job.yml')
 DS_CONFIG_PATH = os.path.join(os.getcwd(), 'credential.yml')
@@ -93,8 +93,6 @@ class Configuration(object):
         if config is None:
             raise DbtCloudConfigError("configuration file error")
         
-        print(config)
-
         for v in config.values():
             src = {
                 'account': v.get('account'),
@@ -107,12 +105,3 @@ class Configuration(object):
                 'stage': v.get('stage')
             }
             return src
-        
-
-if __name__ == '__main__':
-    src = Configuration.load_credentials()
-    print(src)
-    
-
-
-    

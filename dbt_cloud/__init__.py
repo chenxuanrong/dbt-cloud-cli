@@ -3,7 +3,6 @@ import os
 import sys
 from ruamel import yaml
 import json
-from datetime import datetime
 
 from rich.console import Console
 
@@ -68,7 +67,7 @@ def write_to_file(data: dict, name:str, report_dir:str = None) -> str:
         return
 
     if not report_dir:
-        dir = os.getcwd()
+        dir = os.path.join(os.getcwd(), '.artifacts')
     else:
         dir = report_dir
 

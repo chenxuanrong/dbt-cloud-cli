@@ -5,10 +5,10 @@ project_name: svp
 project_id: 34748
 
 environments:
-  - name: Staging 
+  - name: Airflow-SVP Production
     id: 43528
     dbt_version: 1.3.4
-    custom_branch: master
+    custom_branch: release
 
     jobs:
       - name: airflow_da_address_match_prd
@@ -65,3 +65,10 @@ environments:
           - dbt build --select +hpg_property_profile,tag:daily +hpg_property_activity,tag:daily --exclude svp_apm_property_id_mapping
         tracking: true
         schedule: daily
+
+      - name: svp_grs_release_prd
+        id: 95195
+        steps:
+          - dbt build --select mart.grs
+        tracking: true
+        schedule: monthly

@@ -1549,6 +1549,53 @@ An alternative way of using the command without saving the GraphQL query to a fi
 
 </details>
 
+## dbt cloud collect
+
+This command collects dbt cloud job operational metrics. Configuration is declared in a yml file e.g. job.yml
+
+```
+jobs:
+  - name: airflow_da_address_match_prd
+    id: 103334
+    steps:
+      - dbt test --select source:da_address_match
+      - dbt build --select tag:da_address_match --exclude tag:unit-test
+    tracking: true
+    schedule: daily
+```
+
+usage
+```
+dbt-cloud collect --upload
+```
+
+Result
+```
+{
+  "unique_id": "model.single_view_of_property.da_address_match_domain_listing",
+  "job_id": 103334,
+  "job_name": "airflow_da_address_match_prd",
+  "run_id": 173126460,
+  "dbt_version": "1.3.4",
+  "execution_time": 86.69088459014893,
+  "affected_rows": 2248,
+  "status": "success",
+  "collected_at": "2023-07-20T02:40:27.779299Z"
+}
+{
+  "unique_id": "model.single_view_of_property.da_address_match_ccars_auction",
+  "job_id": 103334,
+  "job_name": "airflow_da_address_match_prd",
+  "run_id": 172767290,
+  "dbt_version": "1.3.4",
+  "execution_time": 1646.9697835445404,
+  "affected_rows": 2887,
+  "status": "success",
+  "collected_at": "2023-07-19T02:51:22.329750Z"
+}
+```
+
+
 # Demo utilities
 
 The utilities listed here are for demonstration purposes only and are subject to change. In order to use the demo utilities you need to install the `dbt-cloud-cli` with extra `demo` dependencies:
