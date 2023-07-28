@@ -2,6 +2,10 @@
 
 # dbt-cloud-cli
 
+This is domain' version of `dbt-cloud-cli` forked from `data-mie/dbt-cloud-cli`. The cli app adds `collect` command to track cloud job and collect key metrics. 
+
+See [dbt-cloud collect](#dbt-cloud-collect) to see usage.
+
 `dbt-cloud-cli` is a command line interface for [dbt Cloud API](https://docs.getdbt.com/dbt-cloud/api-v2). It abstracts the REST API calls in an easy-to-use interface that can be incorporated into automated and manual (ad-hoc) workloads. Here are some example use cases for `dbt-cloud-cli`:
 
 1. Triggering a dbt Cloud job to run in a CI/CD pipeline: Use [dbt-cloud job run](#dbt-cloud-job-run) in a CI/CD workflow (e.g., Github Actions) to trigger a dbt Cloud job that runs and tests the changes in a commit branch
@@ -22,7 +26,7 @@
 Installation from PyPI:
 
 ```bash
-pip install dbt-cloud-cli
+pip install git+https://chenxuan.rong:${GITHUB_TOKEN}@github.com/chenxuanrong/dbt-cloud-cli
 ```
 
 Running in Docker:
@@ -1551,7 +1555,8 @@ An alternative way of using the command without saving the GraphQL query to a fi
 
 ## dbt cloud collect
 
-This command collects dbt cloud job operational metrics. Configuration is declared in a yml file e.g. job.yml
+This command collects dbt cloud job operational metrics. 
+Configuration is declared in a yml file e.g. job.yml
 
 ```
 jobs:

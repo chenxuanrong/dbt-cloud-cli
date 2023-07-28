@@ -34,7 +34,8 @@ from dbt_cloud.exc import DbtCloudException
 from dbt_cloud.field import PythonLiteralOption
 from dbt_cloud.configuration import Configuration
 from dbt_cloud.collect import Collector
-
+from dbt_cloud.initializer import Initializer
+from dbt_cloud.exitcode import EC_OK, EC_ERR_GENERAL, EC_ERR_TEST_FAILED
 
 def execute_and_print(command, **kwargs):
     response = command.execute(**kwargs)
@@ -439,16 +440,13 @@ def version():
 @dbt_cloud.command(short_help='Check project configuration.')
 @add_options(debug_option)
 def diagnose(**kwargs):
-    console.print('Diagnosing...')
+    console.print('Diagnosing')
+    console.print(f'[bold dark_orange]Package Version:[/bold dark_orange] {__version__}')
 
     configurator = Configuration.load()
-    console.print(configurator.account_id)
-    console.print(configurator.project_name)
-    console.print(configurator.environments)
-    console.print(configurator.jobs)
+    if not configurator.validate():
+        sys.exit(EC_ERR_GENERAL)
 
-    # if not Validator.diagnose():
-        # sys.exit(1)
 
 @dbt_cloud.command(short_help='Collect job artifacts')
 @click.option("--account-id", default=None, type=click.STRING, help="account id")
@@ -467,3 +465,12 @@ def collect(**kwargs):
     credential = Configuration.load_credentials()
     collector = Collector(configurator=configurator, limit=sample, datasource=credential)
     collector.collect(debug=debug, upload=upload, job_id=job_id)
+
+@dbt_cloud.command(short_help='Initialise collect')
+@add_options(debug_option)
+def init(**kwargs):
+    'Initialize a collect job. The results are saved in project root folder.'
+    console = Console()
+    Initializer.exec()
+
+

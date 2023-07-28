@@ -15,3 +15,5 @@ cov_html/
 # tox
 .tox/
 .artifacts/
+job.yml
+credential.yml

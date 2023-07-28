@@ -5,7 +5,14 @@ from sqlalchemy import create_engine
 
 
 SnowflakeDialect.supports_statement_cache = True
-class SnowflakeConnector():
+class SnowflakeCredentialError(Exception):
+    def __init__(self, *args: object) -> None:
+        self.message = 'Either password or authenticator needs to be provided in credential.yml'
+    
+    def __str__(self) -> str:
+        return self.message
+    
+class SnowflakeConnector(object):
     
     def __init__(self, ds):
         self.account=ds.get('account')
@@ -16,24 +23,8 @@ class SnowflakeConnector():
         self.warehouse=ds.get('warehouse')
         self.auth=ds.get('authenticator')
         self.stage=ds.get('stage')
+        self.password=ds.get('password')
   
-    @staticmethod
-    def connector(ds):
-        conn = snowflake.connector.connect(
-            user=ds.get('user'),
-            account=ds.get('account'),
-            warehouse=ds.get('warehouse'),
-            database=ds.get('database'),
-            schema=ds.get('schema'),
-            authenticator=ds.get('authenticator'),
-            role=ds.get('role'),
-            session_parameters={
-                'QUERY_TAG': 'DQM-API'
-            }
-        )
-        print('Connecting to snowflake')
-        return conn
-    
     def create_engine(self):
         return create_engine(self.to_database_url())
     
@@ -43,19 +34,29 @@ class SnowflakeConnector():
         })
     
     def to_database_url(self):
+        
         db_parameters = {
             "account": self.account,
             "user": self.user,
             "database": self.database,
             "warehouse": self.warehouse,
             "role": self.role,
-            "authenticator": self.auth,
         }
+
+        if self.password:
+            db_parameters['password'] = self.password
+        if self.auth:
+            db_parameters['authenticator'] = self.auth            
         return URL(**db_parameters, cache_column_metadata=True)
     
     def verify_connection(self):
         return None
     
-    def validate(self):
-        return None
+    @staticmethod
+    def validate(credentials):
+        authenticator = credentials.get('authenticator')
+        password = credentials.get('password')
+        if any([authenticator, password]):
+            return True
+        raise SnowflakeCredentialError()
   
