@@ -38,5 +38,5 @@ setup(
     },
     scripts=[],
     entry_points={"console_scripts": ["dbt-cloud = dbt_cloud.cli:dbt_cloud"]},
-    include_package_data=True,
+    package_data={"dbt_cloud": ["VERSION"]}
 )
